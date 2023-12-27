@@ -1,4 +1,4 @@
-numpy>=1.17.
+numpy
 pandas
 streamlit
 Pillow
@@ -6,4 +6,3 @@ replicate
 scikit-learn
 spacy
 es-core-news-sm
-os
