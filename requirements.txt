@@ -1,8 +1,8 @@
-streamlit
+numpy>=1.17.
 pandas
-replicate
-numpy
+streamlit
 Pillow
-spacy
+replicate
 scikit-learn
+spacy
 es-core-news-sm
