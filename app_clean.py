@@ -53,10 +53,10 @@ def search(query, top_k=2):
     return results_text, meta_titles  # Devuelve los títulos de los documentos junto con el texto de los resultados
 
 # Configurar la llamada a Replicate con LLaMA
-os.environ['REPLICATE_API_TOKEN'] = 'r8_ZoboQCK8ShD2AE31PSqZtmtvzTjujbw0qaD1T'
-api = replicate.Client(api_token=os.environ["REPLICATE_API_TOKEN"])
-
+# os.environ['REPLICATE_API_TOKEN'] = 'r8_ZoboQCK8ShD2AE31PSqZtmtvzTjujbw0qaD1T'
 # api = replicate.Client(api_token=os.environ["REPLICATE_API_TOKEN"])
+
+api = replicate.Client(api_token=os.environ["REPLICATE_API_TOKEN"])
 
 from transformers import PreTrainedTokenizerFast
 tokenizer = PreTrainedTokenizerFast.from_pretrained("PlanTL-GOB-ES/roberta-base-bne")
@@ -80,22 +80,22 @@ with st.sidebar:
     st.title('🦙💬 Llama2 Car Care Europe ChatBot')
     
 
-    if 'REPLICATE_API_TOKEN' in st.secrets:
-        st.success('API key already provided!', icon='✅')
-        replicate_api = st.secrets['REPLICATE_API_TOKEN']
-    else:
-        replicate_api = st.text_input('Enter Replicate API token:', type='password')
-        if not (replicate_api.startswith('r8_') and len(replicate_api)==40):
-            st.warning('Please enter your credentials!', icon='⚠️')
-        else:
-            st.success('Proceed to entering your prompt message!', icon='👉')
+    # if 'REPLICATE_API_TOKEN' in st.secrets:
+    #     st.success('API key already provided!', icon='✅')
+    #     replicate_api = st.secrets['REPLICATE_API_TOKEN']
+    # else:
+    #     replicate_api = st.text_input('Enter Replicate API token:', type='password')
+    #     if not (replicate_api.startswith('r8_') and len(replicate_api)==40):
+    #         st.warning('Please enter your credentials!', icon='⚠️')
+    #     else:
+    #         st.success('Proceed to entering your prompt message!', icon='👉')
     
 
-    # replicate_api = st.text_input('Ingresa Replicate API token:', type='password')
-    # if not (replicate_api.startswith('r8_') and len(replicate_api)==40):
-    #     st.warning('Por favor Ingresa las Credenciales!', icon='⚠️')
-    # else:
-    #     st.success('Ahora puedes ingresar el promt del mensaje!', icon='👉')
+    replicate_api = st.text_input('Ingresa Replicate API token:', type='password')
+    if not (replicate_api.startswith('r8_') and len(replicate_api)==40):
+        st.warning('Por favor Ingresa las Credenciales!', icon='⚠️')
+    else:
+        st.success('Ahora puedes ingresar el promt del mensaje!', icon='👉')
         
     os.environ['REPLICATE_API_TOKEN'] = replicate_api
 
