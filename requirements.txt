@@ -6,4 +6,4 @@ replicate
 scikit-learn
 spacy
 es-core-news-sm
-'transformers[torch]'
+transformers[torch]
