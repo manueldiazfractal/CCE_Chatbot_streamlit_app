@@ -4,6 +4,7 @@ import os
 import pandas as pd
 import numpy as np
 from PIL import Image
+import transformers
 import spacy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
@@ -53,7 +54,6 @@ def search(query, top_k=2):
     return results_text, meta_titles  # Devuelve los títulos de los documentos junto con el texto de los resultados
 
 # Configurar la llamada a Replicate con LLaMA
-# os.environ['REPLICATE_API_TOKEN'] = 'r8_ZoboQCK8ShD2AE31PSqZtmtvzTjujbw0qaD1T'
 # api = replicate.Client(api_token=os.environ["REPLICATE_API_TOKEN"])
 
 api = replicate.Client(api_token=os.environ["REPLICATE_API_TOKEN"])
