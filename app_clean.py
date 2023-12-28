@@ -56,8 +56,6 @@ def search(query, top_k=2):
 # Configurar la llamada a Replicate con LLaMA
 # api = replicate.Client(api_token=os.environ["REPLICATE_API_TOKEN"])
 
-# api = replicate.Client(api_token=os.environ["REPLICATE_API_TOKEN"])
-
 from transformers import PreTrainedTokenizerFast
 tokenizer = PreTrainedTokenizerFast.from_pretrained("PlanTL-GOB-ES/roberta-base-bne")
 
@@ -141,8 +139,21 @@ def generate_llama2_response(prompt_input):
     search_result, filenames = search(prompt_input)  # Obtiene los nombres de los archivos de la función search
     prompt_input = "Question: " + prompt_input + "\n\n" + search_result
 
-    output = api.run(
-        "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    # output = api.run(
+    #     "meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3",
+    #     input={
+    #         "debug": False,
+    #         "top_k": 50,
+    #         "top_p": top_p,
+    #         "prompt": prompt_input,
+    #         "temperature": temperature,
+    #         "system_prompt": system_prompt,
+    #         "max_new_tokens": 500,
+    #         "min_new_tokens": -1
+    #         }
+    #     )
+
+    output = replicate.run('meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3', 
         input={
             "debug": False,
             "top_k": 50,
@@ -152,8 +163,7 @@ def generate_llama2_response(prompt_input):
             "system_prompt": system_prompt,
             "max_new_tokens": 500,
             "min_new_tokens": -1
-            }
-        )
+            })
 
     return output, filenames
 
