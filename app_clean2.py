@@ -276,27 +276,22 @@ def generate_llama2_response(prompt_input):
         # Si es una pregunta, realiza la búsqueda y prepara el prompt para la respuesta
         search_result, filenames = search(prompt_input)
         prompt_input = "Question: " + prompt_input + "\n\n" + search_result
+        output = replicate.run('meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3', 
+                               input={
+                                   "debug": False,
+                                   "top_k": 50,
+                                   "top_p": top_p,
+                                   "prompt": prompt_input,
+                                   "temperature": temperature,
+                                   "system_prompt": system_prompt,
+                                   "max_new_tokens": 500,
+                                   "min_new_tokens": -1
+                               })
+        return output, filenames, classification
     elif classification in farewells:
-        # Si es una despedida, prepara un mensaje de despedida
-        return ["Gracias por contactarnos. ¡Hasta pronto!"], []
-    else:
-        # Maneja casos donde la clasificación no es clara
-        return ["Lo siento, no entendí tu pregunta o comentario."], []
-
-    # Si es una pregunta, procede con la generación de la respuesta
-    output = replicate.run('meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3', 
-        input={
-            "debug": False,
-            "top_k": 50,
-            "top_p": top_p,
-            "prompt": prompt_input,
-            "temperature": temperature,
-            "system_prompt": system_prompt,
-            "max_new_tokens": 500,
-            "min_new_tokens": -1
-            })
-
-    return output, filenames
+        # Si es una despedida, solo devuelve la clasificación
+        output = "Gracias por contactarnos. ¡Hasta pronto!"
+        return output, classification
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 # Captura y procesamiento de entradas del usuario
@@ -313,15 +308,23 @@ if prompt := st.chat_input(disabled=not replicate_api):
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
-            response, filenames = generate_llama2_response(prompt)  # Obtiene los nombres de los archivos de la función generate_llama2_response
+        with st.spinner("Escribiendo..."):
+            try:
+                response, filenames, classification = generate_llama2_response(prompt) # Obtiene los nombres de los archivos de la función generate_llama2_response
+            except:
+                response, classification = generate_llama2_response(prompt)
             placeholder = st.empty()
             full_response = ''
+            
             for item in response:
                 full_response += item
                 placeholder.markdown(full_response)
-            # Añade los nombres de los archivos como "fuentes" al final de la respuesta
-            full_response += "\n" + "\nLinks de Interes:\n" + "\n".join("* " + filename for filename in filenames)
-            placeholder.markdown(full_response)
+            
+            # Añade los links solo si la clasificación es "pregunta"
+            if classification in questions:
+                # Añade los nombres de los archivos como "fuentes" al final de la respuesta
+                full_response += "\n" + "\nLinks de Interes:\n" + "\n".join("* " + filename for filename in filenames)
+                placeholder.markdown(full_response)
+    
     message = {"role": "assistant", "content": full_response}
     st.session_state.messages.append(message)
