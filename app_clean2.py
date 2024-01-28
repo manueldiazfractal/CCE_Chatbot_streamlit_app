@@ -8,6 +8,8 @@ import transformers
 import spacy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
+import nltk
+nltk.download('stopwords')
 from nltk.corpus import stopwords
 
 # os.chdir(r"C:\Users\MANUEL ALEJANDRO\Documentos\Fractal")
