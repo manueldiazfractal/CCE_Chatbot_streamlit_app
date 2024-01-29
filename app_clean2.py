@@ -175,7 +175,7 @@ def classify_input(question, api):
     return text_answer
 
 
-# classify_input("Conoces el producto Gummi", api).lower()
+# classify_input("Tengo problemas con la limpieza interior de mi coche", api).lower()
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 # Configuración de la página de Streamlit
@@ -265,33 +265,62 @@ Conclude by checking if further help is needed, and bid farewell politely if the
 questions = ["question", "query", "inquiry", ]
 farewells = ["farewell", "goodbye", "see you"]
 
+
+system_promt_unclear = """As an AI trained to improve clarity and conciseness in communication, your task is to reformulate the user's text or question into a shorter and clearer version. 
+Focus on maintaining the core intent of the question while removing any unnecessary details or complexity."""
+
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 # Función para generar respuestas de Llama2
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 def generate_llama2_response(prompt_input):
+    # try:
     classification = classify_input(prompt_input, api)  # Usa la función classify_input
     classification = classification.lower()
+    # except :
+    #     classification = "unclear"
 
     if classification in questions:
-        # Si es una pregunta, realiza la búsqueda y prepara el prompt para la respuesta
-        search_result, filenames = search(prompt_input)
-        prompt_input = "Question: " + prompt_input + "\n\n" + search_result
-        output = replicate.run('meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3', 
-                               input={
-                                   "debug": False,
-                                   "top_k": 50,
-                                   "top_p": top_p,
-                                   "prompt": prompt_input,
-                                   "temperature": temperature,
-                                   "system_prompt": system_prompt,
-                                   "max_new_tokens": 500,
-                                   "min_new_tokens": -1
-                               })
-        return output, filenames, classification
+        try:
+            # Si es una pregunta, realiza la búsqueda y prepara el prompt para la respuesta
+            search_result, filenames = search(prompt_input)
+            prompt_input = "Question: " + prompt_input + "\n\n" + search_result
+            output = replicate.run('meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3', 
+                                input={
+                                    "debug": False,
+                                    "top_k": 50,
+                                    "top_p": top_p,
+                                    "prompt": prompt_input,
+                                    "temperature": temperature,
+                                    "system_prompt": system_prompt,
+                                    "max_new_tokens": 500,
+                                    "min_new_tokens": -1
+                                })
+            return output, filenames, classification
+        except:
+            # cuando no logra clasificar en alguna de las dos opciones, pide que reformule la pregunta y la haga mas clara
+            filenames = ["https://carcareeurope.es/es/","https://carcareeurope.es/es/marcas"]
+            # prompt_input = "Question: " + prompt_input
+            # output = replicate.run('meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3',
+            #                     input={
+            #                         "debug": False,
+            #                         "top_k": 50,
+            #                         "top_p": top_p,
+            #                         "prompt": prompt_input,
+            #                         "temperature": 0.1,
+            #                         "system_prompt": system_promt_unclear,
+            #                         "max_tokens": 30
+            #                     })
+            
+            output = "Lamento la confusión, pero no logré comprender completamente su consulta. Para poder asistirle de manera más efectiva, ¿podría por favor proporcionar más detalles o reformular su pregunta? Sería de gran ayuda si pudiera especificar el tipo de producto que está buscando. Agradezco su paciencia y cooperación."
+            return output, filenames, classification
+            
     elif classification in farewells:
+        filenames = []
         # Si es una despedida, solo devuelve la clasificación
         output = "Gracias por contactarnos. ¡Hasta pronto!"
-        return output, classification
+        return output, filenames, classification
+
+        
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 # Captura y procesamiento de entradas del usuario
@@ -309,10 +338,11 @@ if prompt := st.chat_input(disabled=not replicate_api):
 if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
         with st.spinner("Escribiendo..."):
-            try:
-                response, filenames, classification = generate_llama2_response(prompt) # Obtiene los nombres de los archivos de la función generate_llama2_response
-            except:
-                response, classification = generate_llama2_response(prompt)
+            # try:
+            #     response, filenames, classification = generate_llama2_response(prompt) # Obtiene los nombres de los archivos de la función generate_llama2_response
+            # except:
+            #     response, classification = generate_llama2_response(prompt)
+            response, filenames, classification = generate_llama2_response(prompt) # Obtiene los nombres de los archivos de la función generate_llama2_response
             placeholder = st.empty()
             full_response = ''
             
